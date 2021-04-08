@@ -52,48 +52,54 @@ export const {
 
 // thunks
 export const fetchTodolistsTC = () => {
-    return (dispatch: Dispatch) => {
-        dispatch(setAppStatusAC({status: 'loading'}))
-        todolistsAPI.getTodolists()
-            .then((res) => {
-                dispatch(setTodolistsAC({todolists: res.data}))
-                dispatch(setAppStatusAC({status: 'succeeded'}))
-            })
-            .catch(error => {
-                handleServerNetworkError(error, dispatch);
-            })
+    return async (dispatch: Dispatch) => {
+        try {
+            dispatch(setAppStatusAC({status: 'loading'}))
+            let res = await todolistsAPI.getTodolists()
+            dispatch(setTodolistsAC({todolists: res.data}))
+            dispatch(setAppStatusAC({status: 'succeeded'}))
+        } catch (e) {
+            handleServerNetworkError(e, dispatch);
+        }
     }
 }
 export const removeTodolistTC = (todolistId: string) => {
-    return (dispatch: Dispatch) => {
-        //изменим глобальный статус приложения, чтобы вверху полоса побежала
-        dispatch(setAppStatusAC({status: 'loading'}))
-        //изменим статус конкретного тудулиста, чтобы он мог задизеблить что надо
-        dispatch(changeTodolistEntityStatusAC({status: 'loading', id: todolistId,}))
-        todolistsAPI.deleteTodolist(todolistId)
-            .then((res) => {
-                dispatch(removeTodolistAC({id: todolistId}))
-                //скажем глобально приложению, что асинхронная операция завершена
-                dispatch(setAppStatusAC({status: 'succeeded'}))
-            })
+    return async (dispatch: Dispatch) => {
+        try {
+            dispatch(setAppStatusAC({status: 'loading'}))
+
+            dispatch(changeTodolistEntityStatusAC({status: 'loading', id: todolistId,}))
+            let res = await todolistsAPI.deleteTodolist(todolistId)
+            dispatch(removeTodolistAC({id: todolistId}))
+            dispatch(setAppStatusAC({status: 'succeeded'}))
+        } catch (e) {
+            handleServerNetworkError(e, dispatch)
+        }
+
     }
 }
 export const addTodolistTC = (title: string) => {
-    return (dispatch: Dispatch) => {
-        dispatch(setAppStatusAC({status: 'loading'}))
-        todolistsAPI.createTodolist(title)
-            .then((res) => {
-                dispatch(addTodolistAC({todolist: res.data.data.item}))
-                dispatch(setAppStatusAC({status: 'succeeded'}))
-            })
+    return async (dispatch: Dispatch) => {
+        try {
+            dispatch(setAppStatusAC({status: 'loading'}))
+            let res = await todolistsAPI.createTodolist(title)
+            dispatch(addTodolistAC({todolist: res.data.data.item}))
+            dispatch(setAppStatusAC({status: 'succeeded'}))
+        } catch (e) {
+            handleServerNetworkError(e, dispatch)
+        }
+
     }
 }
 export const changeTodolistTitleTC = (id: string, title: string) => {
-    return (dispatch: Dispatch) => {
-        todolistsAPI.updateTodolist(id, title)
-            .then((res) => {
-                dispatch(changeTodolistTitleAC({id, title}))
-            })
+    return async (dispatch: Dispatch) => {
+        try {
+            let res = await todolistsAPI.updateTodolist(id, title)
+            dispatch(changeTodolistTitleAC({id, title}))
+        } catch (e) {
+            handleServerNetworkError(e, dispatch)
+        }
+
     }
 }
 
